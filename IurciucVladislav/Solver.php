@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Решатель кв. ур.</title>
-    </head>
-    <body>
-
 <?php
 /**
  * Created by PhpStorm.
@@ -15,14 +7,21 @@
  */
 Class quadraticEquation
 {
-    protected $equation;
+    private $equation;
+    private $a;
+    private $b;
+    private $c;
+    private $d;
+    private $x1;
+    private $x2;
+    private $parts;
 
-    public function __construct($eq)
+    public function __construct($eq = 0)
     {
         $this->equation = $eq;
     }
 
-    protected static function getCoefficient($equation, $powerX = 0): int
+    public function makeEq($equation, $powerX)
     {
         $equation = str_replace(" ", "", $equation);
         $equation = str_replace("*", "", $equation);
@@ -49,66 +48,77 @@ Class quadraticEquation
         if (preg_match("/\A(x|[0-9])/", $equation)) {
             $equation = '+' . $equation;
         }
-        $parts = explode('=', $equation);
-        $parts[0] = str_replace("+x", "+1x", $parts[0]);
-        $parts[0] = str_replace("-x", "-1x", $parts[0]);
+        $this->parts = explode('=', $equation);
+        $this->parts[0] = str_replace("+x", "+1x", $this->parts[0]);
+        $this->parts[0] = str_replace("-x", "-1x", $this->parts[0]);
 
 //    добавляю "+" в правую часть уравнения, если его нет
-        if (preg_match("/\A(x|[0-9])/", $parts[1])) {
-            $parts[1] = '+' . $parts[1];
+        if (preg_match("/\A(x|[0-9])/", $this->parts[1])) {
+            $this->parts[1] = '+' . $this->parts[1];
         }
 
-        preg_match_all('/-?\d*?x\^' . $powerX . '/', $parts[0], $a_matches); // нахожу все х^
-        $a = 0;
+    }
+
+    public function getCoefficient($equation, $powerX = 0): int
+    {
+        $this->makeEq($equation, $powerX);
+        preg_match_all('/-?\d*?x\^' . $powerX . '/', $this->parts[0], $k_matches); // нахожу все х^
+        $k = 0;
 
         // суммирую коэфиценты "а" левой части ур.
-        for ($i = 0; $i < count($a_matches[0]); $i++) {
-            $a_replaced[$i] = preg_replace('/x\^' . $powerX . '/', '', $a_matches[0][$i]);
-            $a += $a_replaced[$i];
+        for ($i = 0; $i < count($k_matches[0]); $i++) {
+            $k_replaced[$i] = preg_replace('/x\^' . $powerX . '/', '', $k_matches[0][$i]);
+            $k += $k_replaced[$i];
         }
 
 
         //правая часть уравнения
 
-        $parts[1] = str_replace("+x", "+1x", $parts[1]);
-        $parts[1] = str_replace("-x", "-1x", $parts[1]);
-        preg_match_all('/(\+|-)\d*?x\^' . $powerX . '/', $parts[1], $a_matches); //нахожу все x^
+        $this->parts[1] = str_replace("+x", "+1x", $this->parts[1]);
+        $this->parts[1] = str_replace("-x", "-1x", $this->parts[1]);
+        preg_match_all('/(\+|-)\d*?x\^' . $powerX . '/', $this->parts[1], $k_matches); //нахожу все x^
         // суммирую коэфиценты "а" правой части ур.
-        for ($i = 0; $i < count($a_matches[0]); $i++) {
-            $a_replaced[$i] = preg_replace('/x\^' . $powerX . '/', '', $a_matches[0][$i]);
-            $a -= $a_replaced[$i];
+        for ($i = 0; $i < count($k_matches[0]); $i++) {
+            $k_replaced[$i] = preg_replace('/x\^' . $powerX . '/', '', $k_matches[0][$i]);
+            $k -= $k_replaced[$i];
         }
-        return $a;
+        return $k;
     }
 
-    public function solveAndShow() {
-        $a = self::getCoefficient($this->equation, 2);
-        $b = self::getCoefficient($this->equation, 1);
-        $c = self::getCoefficient($this->equation, 0);
-        echo 'a = '.$a.'</br>';
-        echo 'b = '.$b.'</br>';
-        echo 'c = '.$c.'</br>';
-        $d = $b*$b-4*$a*$c;
-        echo 'd = '.$d.'</br>';
-        $x1 = (-$b - sqrt($d)) / (2*$a);
-        $x2 = (-$b + sqrt($d)) / (2*$a);
-        echo 'X1 = '.$x1.'</br>';
-        echo 'X2 = '.$x2.'</br>';
+    public function solve() : quadraticEquation
+    {
+        $this->a = $this->getCoefficient($this->equation, 2);
+        $this->b = $this->getCoefficient($this->equation, 1);
+        $this->c = $this->getCoefficient($this->equation, 0);
+        $this->d = $this->b * $this->b - 4 * $this->a * $this->c;
+
+        if ($this->d >= 0) {
+            $this->x1 = round((-$this->b - sqrt($this->d)) / (2 * $this->a), 2);
+
+            if ($this->d > 0)
+            $this->x2 = round((-$this->b + sqrt($this->d)) / (2 * $this->a), 2);
+        }
+
+        return $this;
+    }
+
+    public function show() : quadraticEquation
+    {
+        echo 'a = ' . $this->a . "\n";
+        echo 'b = ' . $this->b . "\n";
+        echo 'c = ' . $this->c . "\n";
+        echo 'd = ' . $this->d . "\n";
+
+        if ($this->d >= 0) {
+            echo 'X1 = ' . $this->x1 . "\n";
+
+            if ($this->d > 0) {
+                echo 'X2 = ' . $this->x2 . "\n";
+            }
+        }
+        return $this;
     }
 }
 
-echo '
-
-    <form action="Solver.php" method="post">
-        <p><input type="text" name="eq" size="40" value="'.$_POST['eq'].'"/></p>
-        <p><input type="submit" /></p>
-    </form>
-';
-$eq = new quadraticEquation(htmlspecialchars($_POST['eq']));
-$eq->solveAndShow();
-
-?>
-
-
-    </body>
-</html>
+$eq = new quadraticEquation(htmlspecialchars($_SERVER['argv'][1]));
+$eq->solve()->show();
