@@ -21,7 +21,7 @@ Class quadraticEquation
         $this->equation = $eq;
     }
 
-    public function makeEq($equation, $powerX)
+    private function makeEq($equation, $powerX)
     {
         $equation = str_replace(" ", "", $equation);
         $equation = str_replace("*", "", $equation);
@@ -59,7 +59,7 @@ Class quadraticEquation
 
     }
 
-    public function getCoefficient($equation, $powerX = 0): int
+    private function getCoefficient($equation, $powerX = 0): int
     {
         $this->makeEq($equation, $powerX);
         preg_match_all('/-?\d*?x\^' . $powerX . '/', $this->parts[0], $k_matches); // нахожу все х^
