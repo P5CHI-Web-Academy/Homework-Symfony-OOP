@@ -170,7 +170,6 @@ class Equation{
             $this->poly1 = new Polynominal($parts[0]);
             $this->poly2 = new Polynominal($parts[1]);
             $this->poly1->combine($this->poly2);
-            //echo($this->poly1);
         }
     }
 
